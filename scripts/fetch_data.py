@@ -1,19 +1,26 @@
-#!/usr/local/bin/python3
+#!/usr/bin/env python
+
+"""
+Fetch data
+"""
+
 import os
 import os.path
 import pandas as pd
-from hedgedata.fetch import whichFetch
 from hedgedata.backfill import whichBackfill
 from hedgedata.data import FIELDS
 from hedgedata.distributor import Distributer
 from hedgedata.log_utils import log
-from hedgedata import symbols as all_symbols
-from hedgedata import sp500_constituents
+# from hedgedata import sp500_constituents
 
 _DISTRIBUTOR = Distributer.default()
 
 
 def defaults(field):
+    """defaults
+
+    :param field:
+    """
     if field == 'DAILY':
         return ['KEY', 'date']
     elif field == 'TICK':
@@ -37,14 +44,28 @@ def defaults(field):
         raise NotImplemented
 
 
-def backfillData(symbols, fields, output='cache'):
-    if not os.path.exists('cache'):
-        os.makedirs('cache')
+def backfillData(
+        symbols,
+        fields,
+        output='cache'):
+    """backfillData
+
+    :param symbols: list of symbols to iterate
+    :param fields: path to files
+    :param output: output dir
+    """
+    if not os.path.exists(output):
+        os.makedirs(output)
 
     for field in fields:
-        if os.path.exists(os.path.join('cache', field) + '.csv'):
-            data_orig = pd.read_csv(os.path.join('cache', field) + '.csv')
-            for k in ('date', 'datetime', 'reportDate', 'EPSReportDate', 'exDate'):
+        if os.path.exists(os.path.join(output, field) + '.csv'):
+            data_orig = pd.read_csv(os.path.join(output, field) + '.csv')
+            for k in (
+                    'date',
+                    'datetime',
+                    'reportDate',
+                    'EPSReportDate',
+                    'exDate'):
                 if k in data_orig.columns:
                     data_orig[k] = pd.to_datetime(data_orig[k])
 
@@ -63,12 +84,26 @@ def backfillData(symbols, fields, output='cache'):
                 data = data[['peer']]
 
             data['KEY'] = symbol
-            data_orig = pd.concat([data_orig, data]) if not data_orig.empty else data
+            data_orig = pd.concat(
+                [data_orig, data]) if not data_orig.empty else data
 
         if not data_orig.empty:
             data_orig.set_index(defaults(field), inplace=True)
-            data_orig[~data_orig.index.duplicated(keep='first')].to_csv(os.path.join('cache', field) + '.csv')
+            data_orig[
+                ~data_orig.index.duplicated(
+                    keep='first')].to_csv(
+                        os.path.join(output, field) + '.csv')
 
 
 if __name__ == '__main__':
-    backfillData(sp500_constituents(), FIELDS)
+    syms = [
+        'SPY',
+        'XLF',
+        'XLK',
+        'XLI',
+        'XLE'
+    ]
+    backfillData(
+        symbols=syms,
+        fields=FIELDS,
+        output='./cache')

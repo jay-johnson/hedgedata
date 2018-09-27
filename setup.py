@@ -16,7 +16,8 @@ setup(
     description='Financial Analytics',
     long_description=long_description,
     url='https://github.com/timkpaine/hedgeme_cache',
-    download_url='https://github.com/timkpaine/hedgeme_cache/archive/v0.0.1.tar.gz',
+    download_url=(
+        'https://github.com/timkpaine/hedgeme_cache/archive/v0.0.1.tar.gz'),
     author='Tim Paine',
     author_email='timothy.k.paine@gmail.com',
     license='BSD 3 Clause',
